@@ -1,0 +1,10 @@
+.idea/*
+*iml
+*rofl
+*testconfig*
+logs/
+out/
+*.class
+settings.xml
+*.dmp
+target
