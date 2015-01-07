@@ -11,7 +11,7 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class SendFragment extends ENetCommand {
+public class SendFragment extends ENetCommand implements DataCommand {
     /**
      * The sequence number of the complete packet, equal to the sequence number of
      * the first fragment.
@@ -44,7 +44,7 @@ public class SendFragment extends ENetCommand {
     /**
      * The data to be sent.
      */
-    private ByteBuf buffer;
+    private ByteBuf data;
 
     public SendFragment(ENetProtocolHeader header, int channelId, int reliableSeqNum,
                          int startSeqNum, int dataLength, long fragCount, long fragNum, long totalLength, long fragOffset, byte[] data) {
@@ -57,7 +57,7 @@ public class SendFragment extends ENetCommand {
         this.totalLength = totalLength;
         this.fragOffset = fragOffset;
 
-        this.buffer = Unpooled.wrappedBuffer(data, (int) fragOffset, dataLength);
+        this.data = Unpooled.wrappedBuffer(data, (int) fragOffset, dataLength);
     }
 
     public SendFragment(ENetProtocolHeader header, int channelId, int reliableSeqNum,
@@ -71,33 +71,33 @@ public class SendFragment extends ENetCommand {
         this.totalLength = totalLength;
         this.fragOffset = fragOffset;
 
-        this.buffer = data;
+        this.data = data;
     }
 
-    public SendFragment(ByteBuf buffer) {
-        super(buffer);
+    public SendFragment(ByteBuf data) {
+        super(data);
 
-        this.startSeqNum = buffer.readUnsignedShort();
-        this.dataLength = buffer.readUnsignedShort();
-        this.fragCount = buffer.readUnsignedInt();
-        this.fragNum = buffer.readUnsignedInt();
-        this.totalLength = buffer.readUnsignedInt();
-        this.fragOffset = buffer.readUnsignedInt();
+        this.startSeqNum = data.readUnsignedShort();
+        this.dataLength = data.readUnsignedShort();
+        this.fragCount = data.readUnsignedInt();
+        this.fragNum = data.readUnsignedInt();
+        this.totalLength = data.readUnsignedInt();
+        this.fragOffset = data.readUnsignedInt();
 
-        this.buffer = buffer.copy(buffer.readerIndex(), dataLength);
+        this.data = data.copy(data.readerIndex(), dataLength);
     }
 
-    public SendFragment(ByteBuf buffer, ENetProtocolHeader header) {
-        super(buffer, header);
+    public SendFragment(ByteBuf data, ENetProtocolHeader header) {
+        super(data, header);
 
-        this.startSeqNum = buffer.readUnsignedShort();
-        this.dataLength = buffer.readUnsignedShort();
-        this.fragCount = buffer.readUnsignedInt();
-        this.fragNum = buffer.readUnsignedInt();
-        this.totalLength = buffer.readUnsignedInt();
-        this.fragOffset = buffer.readUnsignedInt();
+        this.startSeqNum = data.readUnsignedShort();
+        this.dataLength = data.readUnsignedShort();
+        this.fragCount = data.readUnsignedInt();
+        this.fragNum = data.readUnsignedInt();
+        this.totalLength = data.readUnsignedInt();
+        this.fragOffset = data.readUnsignedInt();
 
-        this.buffer = buffer.copy(buffer.readerIndex(), dataLength);
+        this.data = data.copy(data.readerIndex(), dataLength);
     }
 
 
@@ -117,6 +117,6 @@ public class SendFragment extends ENetCommand {
         buffer.writeInt((int) fragNum);
         buffer.writeInt((int) totalLength);
         buffer.writeInt((int) fragOffset);
-        buffer.writeBytes(this.buffer);
+        buffer.writeBytes(this.data);
     }
 }

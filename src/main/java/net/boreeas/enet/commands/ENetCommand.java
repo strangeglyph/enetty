@@ -10,6 +10,7 @@ import lombok.Setter;
  * @author Malte Schütze
  */
 @Getter
+@Setter
 @AllArgsConstructor
 public abstract class ENetCommand {
     public enum SendType {RELIABLE, UNRELIABLE, UNSEQUENCED}
@@ -18,7 +19,7 @@ public abstract class ENetCommand {
     public static final byte FLAG_UNSEQUENCED = (byte) (1 << 6);
     public static final int COMMAND_MASK = 0b111111;
 
-    @Setter private ENetProtocolHeader header;
+    private ENetProtocolHeader header;
     private CommandId command;
     private int channelId;
     private int reliableSequenceNumber;
@@ -66,14 +67,14 @@ public abstract class ENetCommand {
     }
 
     /**
-     * Writes this command, excluding the header, to the specified buffer.
-     * @param buffer The buffer to write to.
+     * Writes this command, excluding the header, to the specified data.
+     * @param buffer The data to write to.
      */
     abstract void writeInternalToBuffer(ByteBuf buffer);
 
     /**
-     * Writes this command to the specified buffer.
-     * @param buffer The buffer to write to.
+     * Writes this command to the specified data.
+     * @param buffer The data to write to.
      */
     public void writeToBuffer(ByteBuf buffer) {
         if (!buffer.isWritable(size())) {

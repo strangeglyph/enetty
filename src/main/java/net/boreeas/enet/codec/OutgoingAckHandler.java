@@ -38,10 +38,10 @@ public class OutgoingAckHandler extends ChannelOutboundHandlerAdapter {
             ENetCommand command = (ENetCommand) msg;
 
             Peer peer = peers.getByIncoming(command.getHeader().getPeerId());
-            peer.getAckPending().add(command);
+            peer.getAckPending().put(command.getReliableSequenceNumber(), command);
 
             ackTimer.schedule(() -> {
-                if (peer.getAckPending().contains(command)) {
+                if (peer.getAckPending().containsKey(command.getReliableSequenceNumber())) {
                     ctx.writeAndFlush(msg);
                 }
             }, peer.getAckTimeout(), TimeUnit.MILLISECONDS);

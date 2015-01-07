@@ -11,41 +11,41 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class SendUnsequenced extends ENetCommand {
+public class SendUnsequenced extends ENetCommand implements DataCommand {
     private int unsequencedGroup;
     private int dataLength;
-    private ByteBuf buffer;
+    private ByteBuf data;
 
     public SendUnsequenced(ENetProtocolHeader header, int channelId, int reliableSeqNum, int unsequencedGroup, byte[] data) {
         super(header, CommandId.SEND_UNSEQUENCED, channelId, reliableSeqNum, SendType.UNSEQUENCED);
 
         this.unsequencedGroup = unsequencedGroup;
         this.dataLength = data.length;
-        this.buffer = Unpooled.wrappedBuffer(data);
+        this.data = Unpooled.wrappedBuffer(data);
     }
 
-    public SendUnsequenced(ENetProtocolHeader header, int channelId, int reliableSeqNum, int unsequencedGroup, ByteBuf buffer) {
+    public SendUnsequenced(ENetProtocolHeader header, int channelId, int reliableSeqNum, int unsequencedGroup, ByteBuf data) {
         super(header, CommandId.SEND_UNSEQUENCED, channelId, reliableSeqNum, SendType.UNSEQUENCED);
 
         this.unsequencedGroup = unsequencedGroup;
-        this.dataLength = buffer.readableBytes();
-        this.buffer = buffer;
+        this.dataLength = data.readableBytes();
+        this.data = data;
     }
 
-    public SendUnsequenced(ByteBuf buffer) {
-        super(buffer);
+    public SendUnsequenced(ByteBuf data) {
+        super(data);
 
-        this.unsequencedGroup = buffer.readUnsignedShort();
-        this.dataLength = buffer.readUnsignedShort();
-        this.buffer = buffer.copy(buffer.readerIndex(), dataLength);
+        this.unsequencedGroup = data.readUnsignedShort();
+        this.dataLength = data.readUnsignedShort();
+        this.data = data.copy(data.readerIndex(), dataLength);
     }
 
-    public SendUnsequenced(ByteBuf buffer, ENetProtocolHeader header) {
-        super(buffer, header);
+    public SendUnsequenced(ByteBuf data, ENetProtocolHeader header) {
+        super(data, header);
 
-        this.unsequencedGroup = buffer.readUnsignedShort();
-        this.dataLength = buffer.readUnsignedShort();
-        this.buffer = buffer.copy(buffer.readerIndex(), dataLength);
+        this.unsequencedGroup = data.readUnsignedShort();
+        this.dataLength = data.readUnsignedShort();
+        this.data = data.copy(data.readerIndex(), dataLength);
     }
 
     @Override

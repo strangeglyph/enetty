@@ -56,8 +56,8 @@ public class ENetProtocolHeader {
     }
 
     /**
-     * Writes this header to a buffer.
-     * @param buffer The buffer to write to.
+     * Writes this header to a data.
+     * @param buffer The data to write to.
      */
     public void writeToBuffer(ByteBuf buffer) {
         buffer.writeInt(checksum);

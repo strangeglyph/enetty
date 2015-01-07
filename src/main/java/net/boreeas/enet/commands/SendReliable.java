@@ -10,36 +10,36 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class SendReliable extends ENetCommand {
+public class SendReliable extends ENetCommand implements DataCommand {
     private int dataLength;
-    private ByteBuf buffer;
+    private ByteBuf data;
 
     public SendReliable(ENetProtocolHeader header, int channelId, int reliableSeqNum, byte[] data) {
         super(header, CommandId.SEND_RELIABLE, channelId, reliableSeqNum, SendType.RELIABLE);
 
         this.dataLength = data.length;
-        this.buffer = Unpooled.wrappedBuffer(data);
+        this.data = Unpooled.wrappedBuffer(data);
     }
 
-    public SendReliable(ENetProtocolHeader header, int channelId, int reliableSeqNum, ByteBuf buffer) {
+    public SendReliable(ENetProtocolHeader header, int channelId, int reliableSeqNum, ByteBuf data) {
         super(header, CommandId.SEND_RELIABLE, channelId, reliableSeqNum, SendType.RELIABLE);
 
-        this.dataLength = buffer.readableBytes();
-        this.buffer = buffer;
+        this.dataLength = data.readableBytes();
+        this.data = data;
     }
 
-    public SendReliable(ByteBuf buffer) {
-        super(buffer);
+    public SendReliable(ByteBuf data) {
+        super(data);
 
-        this.dataLength = buffer.readUnsignedShort();
-        this.buffer = buffer.copy(buffer.readerIndex(), dataLength);
+        this.dataLength = data.readUnsignedShort();
+        this.data = data.copy(data.readerIndex(), dataLength);
     }
 
-    public SendReliable(ByteBuf buffer, ENetProtocolHeader header) {
-        super(buffer, header);
+    public SendReliable(ByteBuf data, ENetProtocolHeader header) {
+        super(data, header);
 
-        this.dataLength = buffer.readUnsignedShort();
-        this.buffer = buffer.copy(buffer.readerIndex(), dataLength);
+        this.dataLength = data.readUnsignedShort();
+        this.data = data.copy(data.readerIndex(), dataLength);
     }
 
     @Override
