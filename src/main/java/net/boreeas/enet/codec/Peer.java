@@ -13,6 +13,7 @@ import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Created by malte on 12/18/14.
@@ -117,6 +118,9 @@ public class Peer {
      */
     private Channel channel;
 
+    private Function<ByteBuf, ByteBuf> encryptionFunction;
+    private Function<ByteBuf, ByteBuf> decryptionFunction;
+
 
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -204,6 +208,6 @@ public class Peer {
         }
 
         unsequencedGroup.set(index);
-        if (dataCallback != null) dataCallback.accept(cmd.getData());
+        if (dataCallback != null) dataCallback.accept(decryptionFunction == null ? cmd.getData() : decryptionFunction.apply(cmd.getData()));
     }
 }

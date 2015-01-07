@@ -71,12 +71,14 @@ public class ENetChannel {
     }
 
     private void deliver(WaitingData data) {
+        ByteBuf decrypted = peer.getDecryptionFunction() == null ? data.buffer : peer.getDecryptionFunction().apply(data.buffer);
+
         if (reliableDataCallback != null) {
-            reliableDataCallback.accept(data.buffer);
+            reliableDataCallback.accept(decrypted);
         } else if (unifiedDataCallback != null) {
-            unifiedDataCallback.accept(data.buffer);
+            unifiedDataCallback.accept(decrypted);
         } else if (peer.getDataCallback() != null) {
-            peer.getDataCallback().accept(data.buffer);
+            peer.getDataCallback().accept(decrypted);
         }
     }
 
@@ -111,6 +113,8 @@ public class ENetChannel {
      * @param buf The data to send
      */
     public void sendReliable(ByteBuf buf) {
+        if (peer.getEncryptionFunction() != null) buf = peer.getEncryptionFunction().apply(buf);
+
         if (peer.getMtu() < buf.readableBytes() + 14) { // Resulting packet length = readable bytes + up to 14 bytes for headers
             sendFragmented(buf);
             return;
@@ -151,6 +155,8 @@ public class ENetChannel {
      * @param buf
      */
     public void sendUnreliable(ByteBuf buf) throws MtuExceededException {
+        if (peer.getEncryptionFunction() != null) buf = peer.getEncryptionFunction().apply(buf);
+
         if (peer.getMtu() < buf.readableBytes() + 14) {
             throw new MtuExceededException(peer.getMtu() + " < " + (buf.readableBytes() + 14));
         }
@@ -243,12 +249,14 @@ public class ENetChannel {
     }
 
     private void deliverUnreliable(SendUnreliable cmd) {
+        ByteBuf data = peer.getDecryptionFunction() == null ? cmd.getData() : peer.getDecryptionFunction().apply(cmd.getData());
+
         if (unreliableDataCallback != null) {
-            unreliableDataCallback.accept(cmd.getData());
+            unreliableDataCallback.accept(data);
         } else if (unifiedDataCallback != null) {
-            unifiedDataCallback.accept(cmd.getData());
+            unifiedDataCallback.accept(data);
         } else if (peer.getDataCallback() != null) {
-            peer.getDataCallback().accept(cmd.getData());
+            peer.getDataCallback().accept(data);
         }
     }
 
