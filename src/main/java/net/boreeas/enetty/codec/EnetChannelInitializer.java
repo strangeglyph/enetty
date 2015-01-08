@@ -7,7 +7,7 @@ import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import lombok.AllArgsConstructor;
 
-import java.util.function.Function;
+import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
 /**
@@ -19,7 +19,7 @@ public class EnetChannelInitializer extends ChannelInitializer {
     private static final EventExecutorGroup group = new DefaultEventExecutorGroup(16);
 
     private ToIntFunction<ByteBuf> checksumCallback;
-    private Function<Peer, PeerInputHandler> newConnectionCallback;
+    private Consumer<Peer> newConnectionCallback;
 
     @Override
     protected void initChannel(Channel ch) throws Exception {

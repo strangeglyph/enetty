@@ -9,20 +9,26 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j;
 
+import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 
 /**
  * Created by malte on 12/9/14.
  */
-@NoArgsConstructor
 @Log4j
 public class ENetClient {
 
     private int bindPort = 0;
     @Setter private ToIntFunction<ByteBuf> checksumCallback;
+    @Setter private Consumer<Peer> newConnectionCallback;
 
-    public ENetClient(int bindPort) {
+    public ENetClient(Consumer<Peer> newConnectionCallback) {
+        this(0, newConnectionCallback);
+    }
+
+    public ENetClient(int bindPort, Consumer<Peer> newConnectionCallback) {
         this.bindPort = bindPort;
+        this.newConnectionCallback = newConnectionCallback;
     }
 
     public void start() throws InterruptedException {
@@ -37,8 +43,7 @@ public class ENetClient {
                 bootstrap.localAddress(bindPort);
             }
 
-            bootstrap.handler(new EnetChannelInitializer(checksumCallback));
-
+            bootstrap.handler(new EnetChannelInitializer(checksumCallback, newConnectionCallback));
 
 
             ChannelFuture f = bootstrap.bind().sync();

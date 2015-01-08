@@ -4,10 +4,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import net.boreeas.enetty.commands.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 /**
  * @author Malte Schütze
@@ -16,11 +14,9 @@ public class IncomingCommandBackend extends ChannelInboundHandlerAdapter {
     private AtomicInteger nextPeerId = new AtomicInteger(0);
 
     private PeerMap peers;
-    private Function<Peer, PeerInputHandler> newConnectionCallback;
+    private Consumer<Peer> newConnectionCallback;
 
-    private Map<Peer, PeerInputHandler> peerInputHandlers = new HashMap<>();
-
-    public IncomingCommandBackend(PeerMap peerMap, Function<Peer, PeerInputHandler> newConnectionCallback) {
+    public IncomingCommandBackend(PeerMap peerMap, Consumer<Peer> newConnectionCallback) {
         this.peers = peerMap;
         this.newConnectionCallback = newConnectionCallback;
     }
@@ -102,8 +98,8 @@ public class IncomingCommandBackend extends ChannelInboundHandlerAdapter {
         peer.setChannelCount(cmd.getChannelCount());
         peer.setWindowSize(cmd.getWindowSize());
 
-        peerInputHandlers.put(peer, newConnectionCallback.apply(peer));
         peers.add(peer);
+        newConnectionCallback.accept(peer);
 
         // TODO actually verify connection parameters
         ENetProtocolHeader header = new ENetProtocolHeader(0, true, peer.getIncomingPeerId(), peer.connectionTime());
