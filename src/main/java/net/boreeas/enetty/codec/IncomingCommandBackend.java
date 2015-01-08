@@ -4,19 +4,19 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import net.boreeas.enetty.commands.*;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
  * @author Malte Schütze
  */
 public class IncomingCommandBackend extends ChannelInboundHandlerAdapter {
-    private AtomicInteger nextPeerId = new AtomicInteger(0);
+    private PeerIdGenerator peerIds;
 
     private PeerMap peers;
     private Consumer<Peer> newConnectionCallback;
 
-    public IncomingCommandBackend(PeerMap peerMap, Consumer<Peer> newConnectionCallback) {
+    public IncomingCommandBackend(PeerIdGenerator peerIds, PeerMap peerMap, Consumer<Peer> newConnectionCallback) {
+        this.peerIds = peerIds;
         this.peers = peerMap;
         this.newConnectionCallback = newConnectionCallback;
     }
@@ -41,6 +41,7 @@ public class IncomingCommandBackend extends ChannelInboundHandlerAdapter {
             handleConnect(ctx, (Connect) cmd);
         } else if (cmd instanceof Disconnect) {
             peers.remove(peer);
+            peerIds.returnId(peer.getPeerId());
         } else if (cmd instanceof Ping) {
             // Pings are ignored
         } else if (cmd instanceof SendFragment) {
@@ -69,7 +70,7 @@ public class IncomingCommandBackend extends ChannelInboundHandlerAdapter {
         peer.setIncomingBandwidth(cmd.getIncomingBandwidth());
         peer.setOutgoingBandwidth(cmd.getOutgoingBandwidth());
         // TODO lookup peer id values in verify
-        peer.setIncomingPeerId(cmd.getOutgoingPeerId());
+        peer.setOurId(cmd.getOutgoingPeerId());
         peer.setPacketThrottleInterval(cmd.getPacketThrottleInterval());
         peer.setPacketThrottleAcceleration(cmd.getPacketThrottleAcceleration());
         peer.setPacketThrottleDeceleration(cmd.getPacketThrottleDeceleration());
@@ -88,8 +89,12 @@ public class IncomingCommandBackend extends ChannelInboundHandlerAdapter {
         peer.setCurrentThrottleValue(0);
         peer.setIncomingBandwidth(cmd.getOutgoingBandwidth());
         peer.setOutgoingBandwidth(cmd.getIncomingBandwidth());
-        peer.setIncomingPeerId(cmd.getOutgoingPeerId());
-        peer.setOutgoingPeerId(nextPeerId.getAndIncrement());
+        peer.setOurId(cmd.getOutgoingPeerId());
+        try {
+            peer.setPeerId(peerIds.next(1)); // 2 milliseconds timeout before failing
+        } catch (InterruptedException e) {
+            throw new IllegalStateException("Too many connected peers");
+        }
         peer.setPacketThrottleAcceleration(cmd.getPacketThrottleAcceleration());
         peer.setPacketThrottleDeceleration(cmd.getPacketThrottleDeceleration());
         peer.setPacketThrottleInterval(cmd.getPacketThrottleInterval());
@@ -102,8 +107,8 @@ public class IncomingCommandBackend extends ChannelInboundHandlerAdapter {
         newConnectionCallback.accept(peer);
 
         // TODO actually verify connection parameters
-        ENetProtocolHeader header = new ENetProtocolHeader(0, true, peer.getIncomingPeerId(), peer.connectionTime());
-        VerifyConnect verification = new VerifyConnect(header, 0xff, 0, peer.getIncomingPeerId(), peer.getMtu(), peer.getWindowSize(), peer.getChannelCount(),
+        ENetProtocolHeader header = new ENetProtocolHeader(0, true, peer.getOurId(), peer.connectionTime());
+        VerifyConnect verification = new VerifyConnect(header, 0xff, 0, peer.getPeerId(), peer.getMtu(), peer.getWindowSize(), peer.getChannelCount(),
                 peer.getIncomingBandwidth(), peer.getOutgoingBandwidth(), peer.getPacketThrottleInterval(), peer.getPacketThrottleAcceleration(), peer.getPacketThrottleDeceleration());
 
         peer.getENetChannel(0xff).writePacket(verification);

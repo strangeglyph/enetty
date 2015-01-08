@@ -9,6 +9,7 @@ import lombok.Synchronized;
 import net.boreeas.enetty.commands.ENetCommand;
 import net.boreeas.enetty.commands.SendUnsequenced;
 
+import java.net.InetAddress;
 import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,14 @@ public class Peer {
      */
     public static final int FREE_RELIABLE_WINDOWS = 8;
 
+    /**
+     * Address of the peer
+     */
+    private InetAddress address;
+    /**
+     * Port of the peer
+     */
+    private int port;
 
     /**
      * Callback for unsequenced data and data delivered to channels where no data callbacks are set
@@ -48,11 +57,11 @@ public class Peer {
     /**
      * Our id on the peer's side.
      */
-    private int incomingPeerId;
+    private int ourId;
     /**
      * Peer's id on our side.
      */
-    private int outgoingPeerId;
+    private int peerId;
 
     /**
      * MTU for the peer

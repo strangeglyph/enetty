@@ -34,7 +34,7 @@ public class PacketThrottle extends ChannelOutboundHandlerAdapter {
     }
 
     public boolean packetThrottled(ENetCommand msg) {
-        Peer peer = peers.getByIncoming(msg.getHeader().getPeerId());
+        Peer peer = peers.getByOurId(msg.getHeader().getPeerId());
         peer.setCurrentThrottleScore((peer.getCurrentThrottleScore() + THROTTLE_VALUE_INCREMENT) % MAX_THROTTLE);
 
         return peer.getCurrentThrottleScore() <= peer.getCurrentThrottleValue();

@@ -37,7 +37,7 @@ public class OutgoingAckHandler extends ChannelOutboundHandlerAdapter {
         if (msg instanceof ENetCommand && ((ENetCommand) msg).getSendType() == ENetCommand.SendType.RELIABLE) {
             ENetCommand command = (ENetCommand) msg;
 
-            Peer peer = peers.getByIncoming(command.getHeader().getPeerId());
+            Peer peer = peers.getByOurId(command.getHeader().getPeerId());
             peer.getAckPending().put(command.getReliableSequenceNumber(), command);
 
             ackTimer.schedule(() -> {

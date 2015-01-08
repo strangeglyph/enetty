@@ -20,6 +20,7 @@ public class EnetChannelInitializer extends ChannelInitializer {
 
     private ToIntFunction<ByteBuf> checksumCallback;
     private Consumer<Peer> newConnectionCallback;
+    private PeerIdGenerator peerIds;
 
     @Override
     protected void initChannel(Channel ch) throws Exception {
@@ -34,7 +35,7 @@ public class EnetChannelInitializer extends ChannelInitializer {
 
                 // inbound
                 .addLast("decoder", new ENetCommandDecoder(peerMap, checksumCallback))
-                .addLast("incomingCommandBackend", new IncomingCommandBackend(peerMap, newConnectionCallback));
+                .addLast("incomingCommandBackend", new IncomingCommandBackend(peerIds, peerMap, newConnectionCallback));
                 ;
     }
 }

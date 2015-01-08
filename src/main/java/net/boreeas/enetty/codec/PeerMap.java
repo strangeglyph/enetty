@@ -1,5 +1,9 @@
 package net.boreeas.enetty.codec;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,19 +14,19 @@ public class PeerMap {
     /**
      * Map peer's outgoing (= peerId in command headers sent by peer) id to the peer.
      */
-    private Map<Integer, Peer> byOutgoingId = new HashMap<>();
+    private Map<Integer, Peer> byPeerId = new HashMap<>();
     /**
-     * Map peer's incoming (= peerId in out command headers sent to the peer) id to the peer.
+     * Map peer's incoming (= peerId in our command headers sent to the peer) id to the peer.
      */
-    private Map<Integer, Peer> byIncomingId = new HashMap<>();
+    private Map<CompositeKey, Peer> byOurId = new HashMap<>();
 
     /**
      * Add a peer to the map.
      * @param peer The peer to add.
      */
     public void add(Peer peer) {
-        byOutgoingId.put((int) peer.getOutgoingPeerId(), peer);
-        byIncomingId.put((int) peer.getIncomingPeerId(), peer);
+        byPeerId.put(peer.getPeerId(), peer);
+        byOurId.put(new CompositeKey(peer.getOurId(), peer.getAddress(), peer.getPort()), peer);
     }
 
     /**
@@ -30,8 +34,8 @@ public class PeerMap {
      * @param peer The peer to remove.
      */
     public void remove(Peer peer) {
-        byOutgoingId.remove((int) peer.getOutgoingPeerId());
-        byIncomingId.remove((int) peer.getIncomingPeerId());
+        byPeerId.remove(peer.getPeerId());
+        byOurId.remove(new CompositeKey(peer.getOurId(), peer.getAddress(), peer.getPort()));
     }
 
     /**
@@ -40,8 +44,8 @@ public class PeerMap {
      * @param id The incoming id.
      * @return The peer.
      */
-    public Peer getByIncoming(int id) {
-        return byIncomingId.get(id);
+    public Peer getByOurId(int id, InetAddress address, int port) {
+        return byOurId.get(new CompositeKey(id, address, port));
     }
 
     /**
@@ -51,6 +55,14 @@ public class PeerMap {
      * @return The peer.
      */
     public Peer getByOutgoing(int id) {
-        return byOutgoingId.get(id);
+        return byPeerId.get(id);
+    }
+
+    @Data
+    @AllArgsConstructor
+    private class CompositeKey {
+        int id;
+        InetAddress address;
+        int port;
     }
 }

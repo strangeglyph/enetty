@@ -94,7 +94,7 @@ public class ENetChannel {
     }
 
     private ENetProtocolHeader makeProtoHeader() {
-        return new ENetProtocolHeader(0, true, peer.getIncomingPeerId(), peer.connectionTime());
+        return new ENetProtocolHeader(0, true, peer.getOurId(), peer.connectionTime());
     }
 
     /**
@@ -233,7 +233,7 @@ public class ENetChannel {
             throw new OutOfWindowException("For data with seq num " + reliableSeqNum + ", startWindow=" + startWindow + " but currentWindow=" + currentWindow);
         }
 
-        queueDelivery(new WaitingData(reliableSeqNum, reliableSeqNum < lastDeliveredReliableSeqNum ? this.cycle + 1 : this.cycle, cmd.getData()));
+        queueDelivery(new WaitingData(reliableSeqNum, reliableSeqNum < lastDeliveredReliableSeqNum ? cycle + 1 : cycle, cmd.getData()));
     }
 
     @Synchronized
