@@ -40,7 +40,7 @@ public class ENetProtocolHeader {
 
         int peerId = buffer.readUnsignedShort();
         this.peerId = peerId & PEER_ID_MASK;
-        this.hasSentTime = (peerId & (FLAG_SENT_TIME << 8)) > 0;
+        this.hasSentTime = true; // (peerId & (FLAG_SENT_TIME << 8)) > 0;
 
         if (hasSentTime) {
             this.sentTime = buffer.readShort();
