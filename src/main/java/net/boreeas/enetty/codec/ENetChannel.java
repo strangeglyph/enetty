@@ -41,6 +41,7 @@ public class ENetChannel {
     }
 
     private void dispatch(ENetCommand command) {
+        command.getHeader().setChecksum(peer.getSessionId());
         // TODO window management...
     }
 

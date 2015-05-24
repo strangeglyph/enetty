@@ -19,9 +19,6 @@ public class ENetCommandEncoder extends MessageToByteEncoder<ENetCommand> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ENetCommand msg, ByteBuf out) throws Exception {
-
-        msg.getHeader().setChecksum(peerLookup.getByOurId(msg.getHeader().getPeerId()).getSessionId());
-
         int beforeIndex = out.writerIndex();
         msg.writeToBuffer(out);
 

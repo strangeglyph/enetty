@@ -18,7 +18,8 @@ public class PeerMap {
     /**
      * Map peer's incoming (= peerId in our command headers sent to the peer) id to the peer.
      */
-    private Map<CompositeKey, Peer> byOurId = new HashMap<>();
+    private Map<Integer, Peer> byOurId = new HashMap<>();
+    //private Map<CompositeKey, Peer> byOurId = new HashMap<>();
 
     /**
      * Add a peer to the map.
@@ -26,7 +27,8 @@ public class PeerMap {
      */
     public void add(Peer peer) {
         byPeerId.put(peer.getPeerId(), peer);
-        byOurId.put(new CompositeKey(peer.getOurId(), peer.getAddress(), peer.getPort()), peer);
+        //byOurId.put(new CompositeKey(peer.getOurId(), peer.getAddress(), peer.getPort()), peer);
+        byOurId.put(peer.getOurId(), peer);
     }
 
     /**
@@ -35,7 +37,8 @@ public class PeerMap {
      */
     public void remove(Peer peer) {
         byPeerId.remove(peer.getPeerId());
-        byOurId.remove(new CompositeKey(peer.getOurId(), peer.getAddress(), peer.getPort()));
+        //byOurId.remove(new CompositeKey(peer.getOurId(), peer.getAddress(), peer.getPort()));
+        byOurId.remove(peer.getOurId());
     }
 
     /**
@@ -44,8 +47,8 @@ public class PeerMap {
      * @param id The incoming id.
      * @return The peer.
      */
-    public Peer getByOurId(int id, InetAddress address, int port) {
-        return byOurId.get(new CompositeKey(id, address, port));
+    public Peer getByOurId(int id/*, InetAddress address, int port*/) {
+        return byOurId.get(id/*new CompositeKey(id, address, port)*/);
     }
 
     /**
